@@ -2,13 +2,8 @@ import React, { useState, useRef } from "react";
 import { Form, Button, Alert, Card } from "react-bootstrap";
 import "./styles.css";
 
-//import OpenAI from 'openai';
-
-const openAiApiKey = process.env.OPENAI_KEY;
-
 const ChatGpt = (props) => {
   const [error, setError] = useState("");
-  const systemRef = useRef(null);
   const userRef = useRef(null);
   const [messages, setMessages] = useState([]);
 
