@@ -12,11 +12,6 @@ const ChatGpt = (props) => {
   const userRef = useRef(null);
   const [messages, setMessages] = useState([]);
 
-  // const openAI = new OpenAI({
-  //     apiKey: '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',
-  //     dangerouslyAllowBrowser: true,
-  // });
-
   const handleChatSubmit = async (e) => {
     e.preventDefault();
     const userMessage = userRef.current.value;
@@ -42,19 +37,6 @@ const ChatGpt = (props) => {
       }
     }
   };
-
-  // const response = await openAI.chat.completions.create({
-  //     model: 'gpt-3.5-turbo',
-  //     messages: newMessages,
-  //     temperature: 1,
-  //     max_tokens: 125,
-  // });
-  //const assistantMessage = await response.choices[0].message.content;
-  // const updatedMessages = await [...newMessages, { role: 'assistant', content: assistantMessage }];
-  // console.log('Response : ', response.choices[0].message.content);
-  // setMessages(updatedMessages);
-  // setMessage(assistantMessage);
-  // //console.log(response);
 
   return (
     <div className="flex p-4 align-items-center justify-content-center mx-auto vh-100">
