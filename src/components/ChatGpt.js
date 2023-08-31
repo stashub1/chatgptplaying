@@ -3,7 +3,6 @@ import { Form, Button, Alert, Card, Row, Col, Stack } from "react-bootstrap";
 import AddDocModal from "./AddDocModal";
 import { DataProvider } from "../contexts/DataContext";
 import useGptRequests from "../controllers/useGptRequests";
-import TopPanel from "./TopPanel";
 
 const ChatGpt = (props) => {
   const [error, setError] = useState("");
