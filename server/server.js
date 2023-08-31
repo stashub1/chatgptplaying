@@ -35,7 +35,7 @@ app.post("/gptquery", async (req, res) => {
 
   //console.log(response);
 
-  res.status(200).json({ success: true, messages: updatedMessages });
+  res.status(200).json({ success: true, openai_response: openAiResponse });
 });
 
 const port = 4000; // Choose a port number
