@@ -2,7 +2,7 @@ import React, { useRef, useContext } from "react";
 import { Button, Modal, Form } from "react-bootstrap";
 import { DataContext } from "../contexts/DataContext";
 
-const AddDocModal = (props) => {
+const SetSystemMessageModal = (props) => {
   const dataRef = useRef(null);
   const { setSystemMessage, systemMessage } = useContext(DataContext);
 
@@ -10,7 +10,7 @@ const AddDocModal = (props) => {
     props.setShow(false);
   };
 
-  const handleAddData = (e) => {
+  const handleSetSystemMessage = (e) => {
     e.preventDefault();
     setSystemMessage(dataRef.current.value);
     closeModal();
@@ -21,7 +21,7 @@ const AddDocModal = (props) => {
       <div>
         <Modal show={props.show} onHide={closeModal} size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>Add Data</Modal.Title>
+            <Modal.Title>Set System Message</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form.Group>
@@ -30,7 +30,7 @@ const AddDocModal = (props) => {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={handleAddData}>Ok</Button>
+            <Button onClick={handleSetSystemMessage}>Ok</Button>
             <Button variant="secondary" onClick={closeModal}>
               Cancel
             </Button>
@@ -41,4 +41,4 @@ const AddDocModal = (props) => {
   );
 };
 
-export default AddDocModal;
+export default SetSystemMessageModal;

@@ -1,0 +1,46 @@
+.file-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 500px;
+  height: 300px;
+  border: 2px dashed rgb(219, 219, 219);
+}
+
+.dropzone {
+  width: 60%;
+  height: 200px;
+  border: 2px dashed #cccccc;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.dropzone.active,
+.dropzone:hover {
+  background-color: #f7f7f7; /* Light gray background */
+  /* Change border color */
+}
+
+.dropzone.is-invalid {
+  /* Styles when there's an error */
+  border-color: red;
+}
+
+.plus-sign {
+  font-size: 48px;
+  color: #cccccc;
+}
+
+.parent-container {
+  display: flex;
+  justify-content: center;
+}
+
+.center-content {
+  display: flex;
+  justify-content: center;
+}

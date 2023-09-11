@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import { Row, Col, Container, Button, ListGroup, ListGroupItem } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Header from "./Header";
 
-const OpenAILogs = (props) => {
+const TestComponent = (props) => {
+  const generateListGroupItems = () => {
+    let items = [];
+    for (let i = 0; i < 20; i++) {
+      items.push(<li key={i}>Item 1</li>);
+    }
+    return items;
+  };
+
   return (
     <div>
-      <Row className="border border-primary bg-light border-2 position-fixed w-100">
-        <h2 className="">Header</h2>
-      </Row>
-      <div style={{ paddingTop: "70px" }}>
+      <Header />
+
+      <div style={{ paddingTop: "60px" }}>
         {/* Add paddingTop to push content below the fixed header */}
         <Row className="border border-primary bg-light border-2">
           <Col className="border border-primary border-2">
@@ -17,7 +25,7 @@ const OpenAILogs = (props) => {
           <Col className="border border-primary border-2">
             <h2 className="">Main col</h2>
             <div>
-              <ListGroup>{/* ListGroupItems */}</ListGroup>
+              <ul>{generateListGroupItems()}</ul>
             </div>
           </Col>
           <Col className="border border-primary border-2">
@@ -32,4 +40,4 @@ const OpenAILogs = (props) => {
   );
 };
 
-export default OpenAILogs;
+export default TestComponent;

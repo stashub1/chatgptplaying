@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Form, Button, Alert, Card, Row, Col, Stack } from "react-bootstrap";
-import AddDocModal from "./AddDocModal";
+import SetSystemMessageModal from "./SetSystemMessageModal";
 import { DataProvider } from "../contexts/DataContext";
 import useGptRequests from "../controllers/useGptRequests";
 
@@ -69,7 +69,7 @@ const ChatGpt = (props) => {
             </Card.Body>
           </Card>
         </div>
-        <AddDocModal show={showAddData} setShow={setShowAddData} />
+        <SetSystemMessageModal show={showAddData} setShow={setShowAddData} />
       </div>
     </Stack>
   );
