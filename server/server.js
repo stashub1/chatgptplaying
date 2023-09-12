@@ -88,8 +88,9 @@ app.delete("/delete-file/:file_id", async (req, res) => {
     return res.status(400).json({ message: "File ID is required." });
   }
   try {
-    await openAI.files.del(file_id);
+    const result = await openAI.files.del(file_id);
     console.log("File deleted sucessfully");
+    res.json({ message: "File deleted successfully.", status: result });
   } catch (error) {
     console.error("Error deleting file:", error);
     res.status(500).json({ message: "Error deleting file." });

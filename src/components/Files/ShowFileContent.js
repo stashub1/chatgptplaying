@@ -6,6 +6,7 @@ const ShowFileContent = (props) => {
 
   useEffect(() => {
     const fileContent = localStorage.getItem(FILE_CONTENT);
+
     if (fileContent) {
       setText(fileContent);
       localStorage.removeItem(FILE_CONTENT);
@@ -14,7 +15,7 @@ const ShowFileContent = (props) => {
 
   return (
     <div>
-      <pre style={{ whiteSpace: "pre-wrap" }}>{text}</pre>
+      <pre style={{ whiteSpace: "pre-line" }}>{text}</pre>
     </div>
   );
 };

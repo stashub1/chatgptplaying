@@ -4,13 +4,12 @@ import { Button, Stack, Table } from "react-bootstrap";
 import "./styles.css";
 import UploadFileModal from "./UploadFileModal";
 import { FILE_CONTENT } from "../../utils/Constants";
+import UploadJsonlModal from "./UploadJsonlModal";
 
 const FilesList = () => {
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [readyFiles, setReadyFiles] = useState([]);
-  const [chosenFile, setChosenFiles] = useState();
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showJsonlUploadDialog, setShowJsonlUploadDialog] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
   const [isParseDialog, setIsParseDialog] = useState(false);
 
@@ -21,9 +20,16 @@ const FilesList = () => {
     }
   }, [showUploadDialog]);
 
+  useEffect(() => {
+    // This code will run when the component mounts
+    if (!showJsonlUploadDialog) {
+      fetchUploadedFiles();
+    }
+  }, [showJsonlUploadDialog]);
+
   const openUploadFileModal = () => {
     setIsParseDialog(false);
-    setShowUploadDialog(true);
+    setShowJsonlUploadDialog(true);
   };
 
   const openParseFileModal = () => {
@@ -36,7 +42,8 @@ const FilesList = () => {
       const response = await fetch("http://localhost:4000/fetch-uploaded-files");
 
       if (response.ok) {
-        const files = await response.json();
+        let files = await response.json();
+        files = files.sort((a, b) => b.created_at - a.created_at);
         setUploadedFiles(files);
         console.log(files);
       } else {
@@ -81,10 +88,10 @@ const FilesList = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Deletion response read");
+        console.log("Deletion Data message: ", data.message);
         setResponseMessage(data.message);
-        setUploadedFiles((prevUploadedFiles) => {
-          return prevUploadedFiles.filter((file) => file.id != fileId);
-        });
+        setUploadedFiles((prevFiles) => prevFiles.filter((file) => file.id !== fileId));
       } else {
         setResponseMessage("Error deleting file");
       }
@@ -156,7 +163,7 @@ const FilesList = () => {
 
                     <td>{file.status}</td>
                     <td>{file.status_details}</td>
-                    <td>{file.created_at}</td>
+                    <td>{new Date(file.created_at * 1000).toLocaleString()}</td>
                     <td>
                       <Button variant="primary" onClick={() => finetune(file.id)}>
                         Finetune
@@ -175,6 +182,7 @@ const FilesList = () => {
           </div>
         )}
         <UploadFileModal parse={isParseDialog} show={showUploadDialog} setShow={setShowUploadDialog} />
+        <UploadJsonlModal show={showJsonlUploadDialog} setShow={setShowJsonlUploadDialog} />
       </Stack>
     </>
   );

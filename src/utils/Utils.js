@@ -1,30 +1,14 @@
-export const extractQuestions = (text) => {
-  //console.log("Text: ", text);
-
-  // Read the file content
-
-  if (!text || text.length === 0) {
-    throw new Error("Text to split questions/answers is empty");
-  }
-
-  try {
-    const faqRegex = /([^?]+)\?\s*([\s\S]*?)(?=(?:\n{2,}|$))/g;
-
-    // Array to store the extracted questions and answers
-    const faqItems = [];
-    let match;
-
-    while ((match = faqRegex.exec(text)) !== null) {
-      const question = match[1].trim();
-      const answer = match[2].trim();
-      faqItems.push({ question, answer });
-    }
-    return faqItems;
-    // Log the extracted questions and answers
-    console.log(faqItems);
-  } catch (error) {
-    console.error(error);
-  }
+export const readFileContent = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      resolve(event.target.result);
+    };
+    reader.onerror = (event) => {
+      reject(new Error("Error reading file: " + event.target.error));
+    };
+    reader.readAsText(file);
+  });
 };
 
 export const parseQA = (text) => {

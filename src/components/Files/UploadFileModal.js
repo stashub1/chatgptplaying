@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button, Stack, Table, Row, Col, Modal, Form } from "react-bootstrap";
-import { extractQuestions, parseQA } from "../../utils/Utils";
+import { readFileContent, parseQA } from "../../utils/Utils";
 import { FILE_CONTENT } from "../../utils/Constants";
 
 const UploadFileModal = (props) => {
@@ -12,7 +12,7 @@ const UploadFileModal = (props) => {
   const [fileError, setFileError] = useState(false);
   const systemMessageRef = useRef(null);
   const [isJsonlFile, setIsJsonlFile] = useState(false);
-  const [parsedQAFull, setParsedQAFull] = useState("");
+  const [parsedQAFull, setParsedQAFull] = useState(null);
 
   function isParsedJsonlOrTxtFile(file) {
     // Check if the file type starts with "text/"
@@ -28,30 +28,35 @@ const UploadFileModal = (props) => {
   }
 
   const handleShowContent = async () => {
-    const fullQA = await prepareJsonlText();
-    console.log("FullQa : ", fullQA);
-    console.log("parsedQAFull : ");
-    viewTextOnPage(fullQA);
+    await prepareJsonlText(selectedFile);
+    console.log("FullQa : ", parsedQAFull);
+    viewTextOnPage(parsedQAFull);
   };
 
-  async function prepareJsonlText() {
+  async function prepareJsonlText(selectedFile = null) {
+    console.log("PrepareJsonlText started");
+    console.log("prepareJsonlText SelectedFile : ");
     try {
       let parsedQA = [];
-      const systemMessage = systemMessageRef.current.value;
+      let systemMessage = systemMessageRef.current.value;
+      console.log("System message :  ", systemMessage);
+      console.log("System not empty :  ", systemMessage !== "");
+
       if (selectedFile) {
         const fileContent = await readFileContent(selectedFile);
         parsedQA = parseQA(fileContent);
       }
       if (systemMessage !== "") {
-        let systemMessage = systemMessageRef.current.value;
         systemMessage = systemMessage.replace(/[\b\f\n\r\t\v]/g, "");
         let systemMessageObject = { role: "system", content: systemMessage };
+        console.log("System obj :  ", systemMessageObject);
         parsedQA.unshift(systemMessageObject);
       }
       const parseQAWithMessages = { messages: parsedQA };
+      console.log("prepareJsonlText setPArseAFull : ", parseQAWithMessages);
       setParsedQAFull(parseQAWithMessages);
-      return parseQAWithMessages;
     } catch (error) {
+      console.error(error);
       setError("Error reading file or reading system content: " + error.message);
     }
   }
@@ -62,25 +67,15 @@ const UploadFileModal = (props) => {
     window.open(url, "_blank");
   }
 
-  const readFileContent = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        resolve(event.target.result);
-      };
-      reader.onerror = (event) => {
-        reject(new Error("Error reading file: " + event.target.error));
-      };
-      reader.readAsText(file);
-    });
-  };
-
-  const onDrop = (acceptedFiles) => {
-    console.log("Acceptede file : ", acceptedFiles[0]);
+  const onDrop = async (acceptedFiles) => {
+    console.log("Accepteble file : ", acceptedFiles[0]);
     if (isParsedJsonlOrTxtFile(acceptedFiles[0])) {
       setSelectedFile(acceptedFiles[0]);
       setError("");
       setFileError(false);
+      console.log("onDrop SelectedFile : ", acceptedFiles[0]);
+
+      await prepareJsonlText(acceptedFiles[0]);
     } else {
       setSelectedFile(null);
       setFileError(true);
@@ -98,10 +93,23 @@ const UploadFileModal = (props) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleUploadFileToOpenAI = async () => {
-    console.log("Files: ", selectedFile);
+    console.log("handleUploadFileToOpenAI: ");
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    if (!props.parse) {
+      formData.append("file", selectedFile);
+      console.log("File: ", selectedFile);
+    } else {
+      console.log("File Creating Blob");
+      // Create a new Blob object with the file content
+      console.log("File Blob parsedQAFull : ", parsedQAFull);
+
+      const blob = new Blob([JSON.stringify(parsedQAFull)], { type: "application/json" });
+      // Append the blob to the FormData object with a filename
+      console.log("File blob: ", blob);
+      formData.append("file", blob, "parsedQA.jsonl");
+    }
+
     try {
       const response = await fetch("http://localhost:4000/upload", {
         method: "POST",
