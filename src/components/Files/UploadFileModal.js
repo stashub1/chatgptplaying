@@ -11,31 +11,25 @@ const UploadFileModal = (props) => {
   const [systemMessageData, setSystemMessageData] = useState("");
   const [fileError, setFileError] = useState(false);
   const systemMessageRef = useRef(null);
-  const [isJsonlFile, setIsJsonlFile] = useState(false);
   const [parsedQAFull, setParsedQAFull] = useState(null);
 
   function isParsedJsonlOrTxtFile(file) {
-    // Check if the file type starts with "text/"
-    let jsonlCheck = file.name.endsWith(".jsonl");
-    if (jsonlCheck) {
-      setIsJsonlFile(true);
-    } else {
-      setIsJsonlFile(false);
-    }
-
     let isTxtFile = file.name.endsWith(".txt");
-    return jsonlCheck || isTxtFile;
+    return isTxtFile;
   }
 
   const handleShowContent = async () => {
-    await prepareJsonlText(selectedFile);
-    console.log("FullQa : ", parsedQAFull);
-    viewTextOnPage(parsedQAFull);
+    const preparedText = await prepareJsonlText();
+    console.log("ShowContent : ", preparedText);
+    localStorage.setItem(FILE_CONTENT, JSON.stringify(preparedText, null, 2));
+    const url = `${window.location.origin}/file_content`;
+    window.open(url, "_blank");
+    console.log("FullQa : ", JSON.stringify(preparedText, null, 2));
+    viewTextOnPage(preparedText);
   };
 
-  async function prepareJsonlText(selectedFile = null) {
+  async function prepareJsonlText() {
     console.log("PrepareJsonlText started");
-    console.log("prepareJsonlText SelectedFile : ");
     try {
       let parsedQA = [];
       let systemMessage = systemMessageRef.current.value;
@@ -43,6 +37,8 @@ const UploadFileModal = (props) => {
       console.log("System not empty :  ", systemMessage !== "");
 
       if (selectedFile) {
+        console.log("prepareJsonlText SelectedFile : ", selectedFile);
+
         const fileContent = await readFileContent(selectedFile);
         parsedQA = parseQA(fileContent);
       }
@@ -55,14 +51,15 @@ const UploadFileModal = (props) => {
       const parseQAWithMessages = { messages: parsedQA };
       console.log("prepareJsonlText setPArseAFull : ", parseQAWithMessages);
       setParsedQAFull(parseQAWithMessages);
+      return parseQAWithMessages;
     } catch (error) {
       console.error(error);
       setError("Error reading file or reading system content: " + error.message);
     }
   }
 
-  function viewTextOnPage(parsedQA) {
-    localStorage.setItem(FILE_CONTENT, JSON.stringify(parsedQA, null, 2));
+  function viewTextOnPage(text) {
+    localStorage.setItem(FILE_CONTENT, JSON.stringify(text, null, 2));
     const url = `${window.location.origin}/file_content`;
     window.open(url, "_blank");
   }
@@ -74,12 +71,11 @@ const UploadFileModal = (props) => {
       setError("");
       setFileError(false);
       console.log("onDrop SelectedFile : ", acceptedFiles[0]);
-
       await prepareJsonlText(acceptedFiles[0]);
     } else {
       setSelectedFile(null);
       setFileError(true);
-      setError("Is should be only a *.txt file or *.jsonl file");
+      setError("Is should be only a *.txt file");
     }
   };
 
@@ -87,6 +83,9 @@ const UploadFileModal = (props) => {
     setSelectedFile(null);
     setResponseMessage("");
     setError("");
+    setFileError(false);
+    setSystemMessageData("");
+    setParsedQAFull(null);
     props.setShow(false);
   };
 
@@ -96,19 +95,14 @@ const UploadFileModal = (props) => {
     console.log("handleUploadFileToOpenAI: ");
 
     const formData = new FormData();
-    if (!props.parse) {
-      formData.append("file", selectedFile);
-      console.log("File: ", selectedFile);
-    } else {
-      console.log("File Creating Blob");
-      // Create a new Blob object with the file content
-      console.log("File Blob parsedQAFull : ", parsedQAFull);
 
-      const blob = new Blob([JSON.stringify(parsedQAFull)], { type: "application/json" });
-      // Append the blob to the FormData object with a filename
-      console.log("File blob: ", blob);
-      formData.append("file", blob, "parsedQA.jsonl");
-    }
+    console.log("File Creating Blob");
+    // Create a new Blob object with the file content
+    console.log("File Blob parsedQAFull : ", parsedQAFull);
+
+    const blob = new Blob([JSON.stringify(parsedQAFull)], { type: "application/json" });
+    console.log("File blob: ", blob);
+    formData.append("file", blob, "parsedQA.jsonl");
 
     try {
       const response = await fetch("http://localhost:4000/upload", {
@@ -146,25 +140,23 @@ const UploadFileModal = (props) => {
                 {error}
               </div>
             )}
-            <Form.Label>Choose file with questions and answers in .txt or .jsonl format</Form.Label>
+            <Form.Label>Choose file with questions and answers in .txt format</Form.Label>
 
             <div {...getRootProps()} className={`mt-2 dropzone ${isDragActive ? "active " : ""} ${fileError ? "is-invalid" : ""}`}>
               <input {...getInputProps()} />
               {isDragActive ? <p>Drop the files here...</p> : <div className="plus-sign">+</div>}
             </div>
             <p className="mt-2 center-content"> {selectedFile && `Selected file: ${selectedFile.name}`}</p>
-            {props.parse && !isJsonlFile && (
-              <Form>
-                <Form.Label>Set system section content</Form.Label>
-                <Form.Control as="textarea" rows={5} ref={systemMessageRef} onChange={(e) => setSystemMessageData(e.target.value)}></Form.Control>
-              </Form>
-            )}
+
+            <Form>
+              <Form.Label>Set system section content</Form.Label>
+              <Form.Control as="textarea" rows={5} ref={systemMessageRef} onChange={(e) => setSystemMessageData(e.target.value)}></Form.Control>
+            </Form>
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          {selectedFile && !props.parse && <Button onClick={handleUploadFileToOpenAI}>Upload File to OpenAi</Button>}
-          {(selectedFile || systemMessageData) && props.parse && <Button onClick={handleUploadFileToOpenAI}>Upload file</Button>}
-          {(selectedFile || systemMessageData) && props.parse && !isJsonlFile && (
+          {(selectedFile || systemMessageData) && <Button onClick={handleUploadFileToOpenAI}>Upload file</Button>}
+          {(selectedFile || systemMessageData) && (
             <Button onClick={handleShowContent} variant="light">
               Pre-show file content
             </Button>

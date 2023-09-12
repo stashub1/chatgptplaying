@@ -17,7 +17,6 @@ const UploadJsonlModal = (props) => {
   async function handleShowContent() {
     if (selectedFile) {
       let fileContent = await readFileContent(selectedFile);
-      fileContent = fileContent.replace(/[\b\f\r\t\v]/g, "");
       localStorage.setItem(FILE_CONTENT, fileContent);
       const url = `${window.location.origin}/file_content`;
       window.open(url, "_blank");

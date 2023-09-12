@@ -15,7 +15,7 @@ const ShowFileContent = (props) => {
 
   return (
     <div>
-      <pre style={{ whiteSpace: "pre-line" }}>{text}</pre>
+      <pre style={{ whiteSpace: "pre-wrap" }}>{text}</pre>
     </div>
   );
 };
