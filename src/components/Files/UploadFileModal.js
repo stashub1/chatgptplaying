@@ -34,12 +34,9 @@ const UploadFileModal = (props) => {
   }
 
   async function prepareJsonlText() {
-    console.log("PrepareJsonlText started");
     try {
       let parsedQA = [];
       let systemMessage = systemMessageRef.current.value;
-      console.log("System message :  ", systemMessage);
-      console.log("System not empty :  ", systemMessage !== "");
 
       if (selectedFile) {
         console.log("prepareJsonlText SelectedFile : ", selectedFile);
@@ -47,17 +44,20 @@ const UploadFileModal = (props) => {
         const fileContent = await readFileContent(selectedFile);
         parsedQA = parseQA(fileContent);
       }
-      if (!parsedQA || parsedQA.length === 0 || Object.keys(parsedQA).length === 0) {
-        throw new Error("There should be some user and assistant messsages in file");
-      }
+
       if (systemMessage !== "") {
         systemMessage = systemMessage.replace(/[\b\f\n\r\t\v]/g, "");
         let systemMessageObject = { role: "system", content: systemMessage };
-        const messagesArray = [];
-        messagesArray.push(systemMessageObject);
-        const systemMessagesObjectWithArray = { messages: messagesArray };
-        console.log("System obj :  ", systemMessagesObjectWithArray);
-        parsedQA.unshift(systemMessagesObjectWithArray);
+        if (parsedQA[0]) {
+          console.log("prepareJsonlText Paesed QA not empty :", parsedQA[0]);
+          parsedQA[0].messages.unshift(systemMessageObject);
+        } else {
+          const messagesArray = [];
+          messagesArray.push(systemMessageObject);
+          const systemMessagesObjectWithArray = { messages: messagesArray };
+          console.log("System obj :  ", systemMessagesObjectWithArray);
+          parsedQA.unshift(systemMessagesObjectWithArray);
+        }
       }
       //const parseQAWithMessages = { messages: parsedQA };
       console.log("prepareJsonlText setPArseAFull : ", parsedQA);
@@ -99,10 +99,12 @@ const UploadFileModal = (props) => {
   const handleUploadFileToOpenAI = async () => {
     const formData = new FormData();
     // Create a new Blob object with the file content
-    console.log("File Blob parsedQAFull : ", parsedQAFull);
-    const fileText = parsedQAFull.map((obj) => JSON.stringify(obj), null, 2).join("\n");
+    const preparedText = await prepareJsonlText();
+
+    console.log("File Blob parsedQAFull : ", preparedText);
+    const fileText = preparedText.map((obj) => JSON.stringify(obj), null, 2).join("\n");
     const blob = new Blob([fileText], { type: "application/json" });
-    console.log("File blob: ", blob);
+    console.log("File blob: ", preparedText);
     formData.append("file", blob, "parsedQA.jsonl");
 
     try {
