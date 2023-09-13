@@ -26,15 +26,17 @@ export const parseQA = (text) => {
       if (currentQuestion !== null) {
         currentQuestion = currentQuestion.replace(/[\b\f\n\r\t\v]/g, "");
         currentAnswer = currentAnswer.replace(/[\b\f\n\r\t\v]/g, "");
-
-        result.push({
+        const QA = [];
+        QA.push({
           role: "user",
           content: currentQuestion,
         });
-        result.push({
+        QA.push({
           role: "assistant",
           content: currentAnswer.trim(),
         });
+        const messages = { messages: QA };
+        result.push(messages);
       }
       currentQuestion = line;
       currentAnswer = "";
@@ -57,5 +59,6 @@ export const parseQA = (text) => {
       content: currentAnswer.trim(),
     });
   }
+  console.log("Parsing Result : ", result);
   return result;
 };

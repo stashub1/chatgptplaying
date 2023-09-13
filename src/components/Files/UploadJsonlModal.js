@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button, Stack, Table, Row, Col, Modal, Form } from "react-bootstrap";
-import { readFileContent, parseQA } from "../../utils/Utils";
+import { readFileContent } from "../../utils/Utils";
 import { FILE_CONTENT } from "../../utils/Constants";
 
 const UploadJsonlModal = (props) => {

@@ -20,13 +20,18 @@ const UploadFileModal = (props) => {
 
   const handleShowContent = async () => {
     const preparedText = await prepareJsonlText();
-    console.log("ShowContent : ", preparedText);
-    localStorage.setItem(FILE_CONTENT, JSON.stringify(preparedText, null, 2));
+    const textToView = preparedText.map((obj) => JSON.stringify(obj), null, 2).join("\n");
+    console.log("ShowContent : ", textToView);
     const url = `${window.location.origin}/file_content`;
     window.open(url, "_blank");
-    console.log("FullQa : ", JSON.stringify(preparedText, null, 2));
-    viewTextOnPage(preparedText);
+    viewTextOnPage(textToView);
   };
+
+  function viewTextOnPage(text) {
+    localStorage.setItem(FILE_CONTENT, text);
+    const url = `${window.location.origin}/file_content`;
+    window.open(url, "_blank");
+  }
 
   async function prepareJsonlText() {
     console.log("PrepareJsonlText started");
@@ -42,26 +47,26 @@ const UploadFileModal = (props) => {
         const fileContent = await readFileContent(selectedFile);
         parsedQA = parseQA(fileContent);
       }
+      if (!parsedQA || parsedQA.length === 0 || Object.keys(parsedQA).length === 0) {
+        throw new Error("There should be some user and assistant messsages in file");
+      }
       if (systemMessage !== "") {
         systemMessage = systemMessage.replace(/[\b\f\n\r\t\v]/g, "");
         let systemMessageObject = { role: "system", content: systemMessage };
-        console.log("System obj :  ", systemMessageObject);
-        parsedQA.unshift(systemMessageObject);
+        const messagesArray = [];
+        messagesArray.push(systemMessageObject);
+        const systemMessagesObjectWithArray = { messages: messagesArray };
+        console.log("System obj :  ", systemMessagesObjectWithArray);
+        parsedQA.unshift(systemMessagesObjectWithArray);
       }
-      const parseQAWithMessages = { messages: parsedQA };
-      console.log("prepareJsonlText setPArseAFull : ", parseQAWithMessages);
-      setParsedQAFull(parseQAWithMessages);
-      return parseQAWithMessages;
+      //const parseQAWithMessages = { messages: parsedQA };
+      console.log("prepareJsonlText setPArseAFull : ", parsedQA);
+      setParsedQAFull(parsedQA);
+      return parsedQA;
     } catch (error) {
       console.error(error);
       setError("Error reading file or reading system content: " + error.message);
     }
-  }
-
-  function viewTextOnPage(text) {
-    localStorage.setItem(FILE_CONTENT, JSON.stringify(text, null, 2));
-    const url = `${window.location.origin}/file_content`;
-    window.open(url, "_blank");
   }
 
   const onDrop = async (acceptedFiles) => {
@@ -92,15 +97,11 @@ const UploadFileModal = (props) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleUploadFileToOpenAI = async () => {
-    console.log("handleUploadFileToOpenAI: ");
-
     const formData = new FormData();
-
-    console.log("File Creating Blob");
     // Create a new Blob object with the file content
     console.log("File Blob parsedQAFull : ", parsedQAFull);
-
-    const blob = new Blob([JSON.stringify(parsedQAFull)], { type: "application/json" });
+    const fileText = parsedQAFull.map((obj) => JSON.stringify(obj), null, 2).join("\n");
+    const blob = new Blob([fileText], { type: "application/json" });
     console.log("File blob: ", blob);
     formData.append("file", blob, "parsedQA.jsonl");
 
