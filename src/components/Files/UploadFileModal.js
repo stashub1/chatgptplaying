@@ -11,6 +11,7 @@ const UploadFileModal = (props) => {
   const [systemMessageData, setSystemMessageData] = useState("");
   const [fileError, setFileError] = useState(false);
   const systemMessageRef = useRef(null);
+  const fileNameRef = useRef(null);
   const [parsedQAFull, setParsedQAFull] = useState(null);
 
   function isParsedJsonlOrTxtFile(file) {
@@ -97,6 +98,10 @@ const UploadFileModal = (props) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleUploadFileToOpenAI = async () => {
+    if (!fileNameRef.current.value?.trim()) {
+      setError("File name is required.");
+      return; // Stop the function execution
+    }
     const formData = new FormData();
     // Create a new Blob object with the file content
     const preparedText = await prepareJsonlText();
@@ -105,8 +110,8 @@ const UploadFileModal = (props) => {
     const fileText = preparedText.map((obj) => JSON.stringify(obj), null, 2).join("\n");
     const blob = new Blob([fileText], { type: "application/json" });
     console.log("File blob: ", preparedText);
+    formData.append("filename", fileNameRef.current.value);
     formData.append("file", blob, "parsedQA.jsonl");
-
     try {
       const response = await fetch("http://localhost:4000/upload", {
         method: "POST",
@@ -143,7 +148,12 @@ const UploadFileModal = (props) => {
                 {error}
               </div>
             )}
-            <Form.Label>Choose file with questions and answers in .txt format</Form.Label>
+            <Form>
+              <Form.Label>Set file name</Form.Label>
+              <Form.Control ref={fileNameRef}></Form.Control>
+            </Form>
+
+            <Form.Label className="mt-3">Choose file with questions and answers in .txt format</Form.Label>
 
             <div {...getRootProps()} className={`mt-2 dropzone ${isDragActive ? "active " : ""} ${fileError ? "is-invalid" : ""}`}>
               <input {...getInputProps()} />

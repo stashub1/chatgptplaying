@@ -25,7 +25,8 @@ const storage = multer.diskStorage({
     cb(null, "uploads/"); // Uploads will be stored in the "uploads" directory
   },
   filename: (req, file, cb) => {
-    const name = Date.now() + path.extname(file.originalname);
+    console.log("FileName : ", req.body.filename);
+    const name = req.body.filename || Date.now() + path.extname(file.originalname);
     currentFile = name;
     cb(null, name);
   },
