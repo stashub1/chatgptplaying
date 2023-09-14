@@ -9,6 +9,7 @@ const UploadJsonlModal = (props) => {
   const [error, setError] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const [fileError, setFileError] = useState(false);
+  const fileNameRef = useRef(null);
 
   function isParsedJsonlFile(file) {
     return file.name.endsWith(".jsonl");
@@ -51,8 +52,13 @@ const UploadJsonlModal = (props) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleUploadFileToOpenAI = async () => {
+    if (!fileNameRef.current.value?.trim()) {
+      setError("File name is required.");
+      return; // Stop the function execution
+    }
     console.log("handleUploadFileToOpenAI: ");
     const formData = new FormData();
+    formData.append("filename", fileNameRef.current.value);
     formData.append("file", selectedFile);
     console.log("File: ", selectedFile);
     try {
@@ -91,7 +97,12 @@ const UploadJsonlModal = (props) => {
                 {error}
               </div>
             )}
-            <Form.Label>Choose file with questions and answers .jsonl format</Form.Label>
+            <Form>
+              <Form.Label>Set file name</Form.Label>
+              <Form.Control ref={fileNameRef}></Form.Control>
+            </Form>
+
+            <Form.Label className="mt-3">Choose file with questions and answers .jsonl format</Form.Label>
 
             <div {...getRootProps()} className={`mt-2 dropzone ${isDragActive ? "active " : ""} ${fileError ? "is-invalid" : ""}`}>
               <input {...getInputProps()} />

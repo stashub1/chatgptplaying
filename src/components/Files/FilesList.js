@@ -6,7 +6,7 @@ import UploadFileModal from "./UploadFileModal";
 import { FILE_CONTENT } from "../../utils/Constants";
 import UploadJsonlModal from "./UploadJsonlModal";
 
-const FilesList = () => {
+const FilesList = (props) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showJsonlUploadDialog, setShowJsonlUploadDialog] = useState(false);
@@ -18,7 +18,7 @@ const FilesList = () => {
     if (!showUploadDialog) {
       fetchUploadedFiles();
     }
-  }, [showUploadDialog]);
+  }, [showUploadDialog, props.refreshKey]);
 
   useEffect(() => {
     // This code will run when the component mounts
@@ -38,6 +38,7 @@ const FilesList = () => {
   };
 
   const fetchUploadedFiles = async () => {
+    console.log("fetchUploadedFiles");
     try {
       const response = await fetch("http://localhost:4000/fetch-uploaded-files");
 
@@ -165,7 +166,7 @@ const FilesList = () => {
                     <td>{file.status_details}</td>
                     <td>{new Date(file.created_at * 1000).toLocaleString()}</td>
                     <td>
-                      <Button variant="primary" onClick={() => finetune(file.id)}>
+                      <Button className="ms-2" variant="primary" onClick={() => finetune(file.id)}>
                         Finetune
                       </Button>
                       <Button className="ms-2" variant="light" onClick={() => handleShowContent(file.id)}>

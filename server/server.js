@@ -114,6 +114,22 @@ app.post("/retrieve-file-content/:file_id", async (req, res) => {
   }
 });
 
+app.post("/retrieve-file-details/:file_id", async (req, res) => {
+  const file_id = req.params.file_id;
+
+  if (!file_id) {
+    return res.status(400).json({ message: "File ID is required." });
+  }
+  try {
+    const content = await openai.files.retrieve(file_id);
+    console.log("File Details: ", content);
+    res.json({ success: true, data: content });
+  } catch (error) {
+    console.error("Error retrieveing file detauls", error);
+    res.status(500).json({ message: "Error retrieveing file details." + error.nessage });
+  }
+});
+
 app.get("/get-jobs", async (req, res) => {
   try {
     const list = openAI.fineTuning.jobs.list();

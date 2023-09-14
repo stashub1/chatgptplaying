@@ -7,8 +7,16 @@ import FineTuneJobs from "./FineTuneJobs";
 
 const MultiTab = (props) => {
   const [currentTab, setCurrentTab] = useState("ChatGpt");
+  const [finetuneJobsRefreshKey, setFinetuneJobsRefreshKey] = useState(0);
+  const [filelistRefreshKey, setFilelistsRefreshKey] = useState(0);
 
   const handleTabSelect = (tabKey) => {
+    if (tabKey === "Finetune_Jobs") {
+      console.log("Set FinetuneJobs key");
+      setFinetuneJobsRefreshKey((prevKey) => prevKey + 1);
+    } else if (tabKey === "FIles") {
+      setFilelistsRefreshKey((prevkey) => prevkey + 1);
+    }
     setCurrentTab(tabKey);
   };
 
@@ -18,14 +26,11 @@ const MultiTab = (props) => {
         <Tab eventKey="ChatGpt" title="ChatGpt">
           <ChatGpt />
         </Tab>
-        <Tab eventKey="OpenAILogs" title="OpenAi Logs">
-          <OpenAILogs />
-        </Tab>
         <Tab eventKey="FIles" title="Files">
-          <FileList />
+          <FileList refreshKey={filelistRefreshKey} />
         </Tab>
         <Tab eventKey="Finetune_Jobs" title="Finetune Jobs">
-          <FineTuneJobs />
+          <FineTuneJobs refreshKey={finetuneJobsRefreshKey} />
         </Tab>
       </Tabs>
     </div>
